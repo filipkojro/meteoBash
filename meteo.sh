@@ -50,11 +50,13 @@ fi
 for ((i=0; i<=$(echo $meteoAPI | jq '. | length'); i++)); # pobieranie danych z api nominatim
 do
     if [[ $i -eq $(echo $meteoAPI | jq '. | length') ]]
-    then
-        cityName=$homeCity
-    else
-        cityName=$(echo $meteoAPI | jq -r '.['$i'].stacja')
-    fi
+    thenhen
+    cityCash=$(cat $cityCashPath)
+else
+    echo 'pierwsze uruchomienie potrwa ponad minute z powodu ograniczen nalozonych przez https://nominatim.org/'
+    echo 'prosze o cierpliwosc :)'
+    echo {} > $cityCashPath
+fi
 
     if [[ $debug -eq 1 ]]
     then
@@ -113,13 +115,15 @@ do
 
     if [[ $debug -eq 1 ]]
     then
-    echo 'obliczanie odleglosci od '$homeCity' do '$cityName ' i porownanie z '$shortCity
+    echo 'obliczanie odleglosci od '$homeCity' do '$cityName ' i porownanie z '$shortCity 'odeglosc' $cityDist '<' $shortDist
     fi
 
-    if [[ $(echo $cityDist'<'$shortDist | bc) -eq 1 ]]
+    if [[ $(echo "$cityDist < $shortDist" | bc -l) -eq 1 ]]
     then
         shortCity=$cityName
+        shortDist=$cityDist
     fi
+
 done
 
 #shortCityIdx=$(echo $meteoAPI | jq 'map(.stacja == '\"$shortCity\"') | index(true)')
