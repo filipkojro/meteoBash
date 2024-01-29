@@ -45,16 +45,16 @@ fi
 if [[ -e $cashPath'meteoCash.json' && -e $cashPath'meteoCash.txt' ]] # pobieranie danych z IMGW tylko gdy dane sa starsze niz godzina lub gdy ich nie ma
 then
     meteoAPI=$(cat $cashPath'meteoCash.json')
-    if [[ "$(echo $meteoAPI | jq -r '.[0].data_pomiaru')$(echo $meteoAPI | jq -r '.[0].godzina_pomiaru')" != "$(cat $cashPath'meteoCash.txt')" ]]
+    if [[ "$(date +"%Y%m%d%H")" != "$(cat $cashPath'meteoCash.txt')" ]]
     then
         meteoAPI=$(curl -s https://danepubliczne.imgw.pl/api/data/synop) # pobieranie danych od IMGW-PIB
         echo $meteoAPI > $cashPath'meteoCash.json'
-        echo "$(echo $meteoAPI | jq -r '.[0].data_pomiaru')$(echo $meteoAPI | jq -r '.[0].godzina_pomiaru')" > $cashPath'meteoCash.txt'
+        echo "$(date +"%Y%m%d%H")" > $cashPath'meteoCash.txt'
     fi
 else
     meteoAPI=$(curl -s https://danepubliczne.imgw.pl/api/data/synop) # pobieranie danych od IMGW-PIB
     echo $meteoAPI > $cashPath'meteoCash.json'
-    echo "$(echo $meteoAPI | jq -r '.[0].data_pomiaru')$(echo $meteoAPI | jq -r '.[0].godzina_pomiaru')" > $cashPath'meteoCash.txt'
+    echo "$(date +"%Y%m%d%H")" > $cashPath'meteoCash.txt'
 fi
 
 
@@ -153,7 +153,6 @@ do
     fi
 
 done
-
 shortCityIdx=$(echo $meteoAPI | jq --arg shortCity "$shortCity" 'map(.stacja == $shortCity) | index(true)')
 
 # wypisanie danych pogodowych najblizszego miasta do wpidanego
