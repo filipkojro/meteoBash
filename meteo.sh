@@ -46,17 +46,16 @@ else
 fi
 
 
-
-for ((i=0; i<=$(echo $meteoAPI | jq '. | length'); i++)); # pobieranie danych z api nominatim
+# pobieranie danych z api nominatim
+for ((i=0; i<=$(echo $meteoAPI | jq '. | length'); i++));
 do
+
     if [[ $i -eq $(echo $meteoAPI | jq '. | length') ]]
-    thenhen
-    cityCash=$(cat $cityCashPath)
-else
-    echo 'pierwsze uruchomienie potrwa ponad minute z powodu ograniczen nalozonych przez https://nominatim.org/'
-    echo 'prosze o cierpliwosc :)'
-    echo {} > $cityCashPath
-fi
+    then
+        cityName=$1
+    else
+        cityName=$(echo $meteoAPI | jq -r '.['$i'].stacja')
+    fi
 
     if [[ $debug -eq 1 ]]
     then
@@ -130,12 +129,10 @@ done
 shortCityIdx=$(echo $meteoAPI | jq --arg shortCity "$shortCity" 'map(.stacja == $shortCity) | index(true)')
 
 
-echo "najblizsze miasto:" $shortCity
-echo "data pomiaru:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].data_pomiaru')
-echo "godzina pomiaru:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].godzina_pomiaru')":00"
-echo "temperatura:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].temperatura') "C"
+echo $shortCity '['$(echo $meteoAPI | jq -r '.['$shortCityIdx'].id_stacji')'] /' $(echo $meteoAPI | jq -r '.['$shortCityIdx'].data_pomiaru') $(echo $meteoAPI | jq -r '.['$shortCityIdx'].godzina_pomiaru')":00"
+echo "temperatura:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].temperatura') "°C"
 echo "predkosc wiatru:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].predkosc_wiatru') "m/s"
-echo "kierunek_wiatru:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].kierunek_wiatru')
+echo "kierunek_wiatru:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].kierunek_wiatru') "°"
 echo "wilgotnosc wzgledna:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].wilgotnosc_wzgledna') "%"
 echo "sumaopadu:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].suma_opadu') "mm"
 echo "cisnienie:" $(echo $meteoAPI | jq -r '.['$shortCityIdx'].cisnienie') "hPa"
