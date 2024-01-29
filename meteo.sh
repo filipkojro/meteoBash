@@ -96,7 +96,7 @@ do
 
         cityGeometry=$(curl -s -L -H "User-Agent: Mozilla/5.0" "https://nominatim.openstreetmap.org/search?country=Poland&city='$cityName'&limit=1&format=geojson" | jq '.features[0].geometry')
 
-        if [[ -z "$cityGeometry" || "$cityGeometry" == "null" ]]
+        if [[ -z "$cityGeometry" || "$cityGeometry" == "null" ]] # dodawanie do cachu
         then
             echo "Error while fetching data from Nominatim for $cityName"
             exit 1
@@ -128,7 +128,7 @@ do
     # obliczanie odleglosci od poprzedniego najblizszego miasta
     deltax=$(echo $inputx-$shortx | bc)
     deltay=$(echo $inputy-$shorty | bc)
-    shortDist=$(echo $deltax*$deltax+$deltay*$deltay | bc)
+    shortDist=$(echo $deltax*$deltax+$deltay*$deltay | bc) # obliczanie odleglosci korzystajac z twierdzenie pitagorasa
 
     cityName=$(echo $meteoAPI | jq -r '.['$i'].stacja')
     cityNamePars=$(echo $cityName | iconv -f utf8 -t ascii//TRANSLIT | tr ' ' '_') #usuwanie polskich znakow i spacji z nazwy miasta
@@ -139,14 +139,14 @@ do
     # obliczanie odleglosci od miasta
     deltax=$(echo $inputx-$cityx | bc)
     deltay=$(echo $inputy-$cityy | bc)
-    cityDist=$(echo $deltax*$deltax+$deltay*$deltay | bc)
+    cityDist=$(echo $deltax*$deltax+$deltay*$deltay | bc) # obliczanie odleglosci korzystajac z twierdzenie pitagorasa
 
     if [[ $debug -eq 1 ]]
     then
     echo 'obliczanie odleglosci od '$homeCity' do '$cityName ' i porownanie z '$shortCity 'odeglosc' $cityDist '<' $shortDist
     fi
 
-    if [[ $(echo "$cityDist < $shortDist" | bc -l) -eq 1 ]]
+    if [[ $(echo "$cityDist < $shortDist" | bc -l) -eq 1 ]] # porownanie odleglosci poprzedniego najblizszego miasta i nowo obliczonego miasta
     then
         shortCity=$cityName
         shortDist=$cityDist
@@ -154,8 +154,9 @@ do
 
 done
 
-#shortCityIdx=$(echo $meteoAPI | jq 'map(.stacja == '\"$shortCity\"') | index(true)')
 shortCityIdx=$(echo $meteoAPI | jq --arg shortCity "$shortCity" 'map(.stacja == $shortCity) | index(true)')
+
+# wypisanie danych pogodowych najblizszego miasta do wpidanego
 
 echo ' '
 
